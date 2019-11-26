@@ -1,26 +1,31 @@
 package main
 
 import (
+	"conn"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 	"src/github.com/dgrijalva/jwt-go"
+	"src/github.com/subosito/gotenv"
 )
 
-var db *sql.DB
+var db *conn.DB
 
 //user information
 type User struct {
 	ID       int
 	Email    string
 	Password string
+	Area     string
 }
 
 //json-web-token
@@ -33,63 +38,28 @@ type Error struct {
 	Message string
 }
 
-//用戶資料
-type MySqlUser struct {
-	Host string //主機
-	//最大連接數
-	MaxIdle  int
-	MaxOpen  int
-	User     string //用戶名
-	Password string //密碼
-	Database string //資料庫名稱
-	Port     int    //端口
-}
-
-//設定資料庫資訊
-var user = MySqlUser{
-	Host:     "127.0.0.1", //主機
-	MaxIdle:  10,          //閒置的連接數
-	MaxOpen:  10,          //最大連接數
-	User:     "root",      //用戶名
-	Password: "asdf4440",  //密碼
-	Database: "users",     //資料庫名稱
-	Port:     3306,        //端口
+type Ubike struct {
+	Name  string
+	Area  string
+	Total int
 }
 
 //初始化連線
 func init() {
-	var err error
-
-	//完整的資料格式: [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
-	//func Sprintf(format string, a ...interface{}) string
-	DataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
-		user.User,
-		user.Password,
-		user.Host,
-		user.Port,
-		user.Database)
-
-	//開啟資料庫連線(sql.Open只是初始化sql.DB物件)
-	//func Open(driverName, dataSourceName string) (*DB, error)
-	//第一個參數為驅動名稱，第二個參數為資料庫的連結
-	db, err = sql.Open("mysql", DataSourceName)
-	//檢查錯誤
-	if err != nil {
-		log.Fatal(err)
-	}
-	//立即檢查資料庫連線是否可用
-	//func (db *DB) Ping() error
-	err = db.Ping()
-	//檢查錯誤
-	if err != nil {
-		log.Fatal(err)
+	gotenv.Load()
+	//設定資料庫資訊
+	user := conn.MySqlUser{
+		Host:     os.Getenv("db_host"), //主機
+		MaxIdle:  10,                   //閒置的連接數
+		MaxOpen:  10,                   //最大連接數
+		User:     os.Getenv("db_user"), //用戶名
+		Password: os.Getenv("db_pass"), //密碼
+		Database: os.Getenv("db_name"), //資料庫名稱
+		Port:     os.Getenv("db_port"), //端口
 	}
 
-	//設定最大連接數
-	//SetMaxIdleConns設置閒置的連接數
-	db.SetMaxIdleConns(user.MaxIdle)
-	//SetMaxOpenConns設置最大打開的連接數，默認值為0代表沒有限制
-	db.SetMaxOpenConns(user.MaxOpen)
+	connect_db := user.Init()
+	db = conn.NewDB(connect_db)
 }
 
 func main() {
@@ -100,9 +70,23 @@ func main() {
 	//func (r *Router) Methods(methods ...string) *Route
 	router.HandleFunc("/signup", Signup).Methods("POST")
 	router.HandleFunc("/login", Login).Methods("POST")
+	router.HandleFunc("/datas", Contacts).Methods("GET")
+	router.HandleFunc("/datas/{id}", Contacts).Methods("GET")
 
+	//func (r *Router) Use(mc MiddlewareChain)
+	//attach JWT auth middleware
+	router.Use(JwtAuthentication)
+
+	//localhost
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	//connect server
-	log.Fatal(http.ListenAndServe(":8080", router))
+	err := http.ListenAndServe(":"+port, router)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 //response
@@ -138,6 +122,24 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	}
 	if user.Password == "" {
 		error.Message = "Password is not empty!"
+		SendError(w, http.StatusBadRequest, error)
+		return
+	}
+	if user.Area == "" {
+		error.Message = "Area is not empty!"
+		SendError(w, http.StatusBadRequest, error)
+		return
+	}
+
+	//信箱需有@
+	if !strings.Contains(user.Email, "@") {
+		error.Message = "Email address is error"
+		SendError(w, http.StatusBadRequest, error)
+		return
+	}
+	//密碼長度需大於六字元
+	if len(user.Password) < 6 {
+		error.Message = "Password length is not enough(6 char)!"
 		SendError(w, http.StatusBadRequest, error)
 		return
 	}
@@ -254,10 +256,33 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	SendSuccess(w, jwt)
 }
 
+func Contacts(w http.ResponseWriter, r *http.Request) {
+	var ubikes []Ubike
+
+	//使用資料庫
+	db.Use_Db("ubike")
+	rows, err := db.Query("select name, area, total from data")
+	if err != nil {
+		log.Fatal(err)
+	}
+	//最後必須關閉
+	defer rows.Close()
+	//處理每一行
+	for rows.Next() {
+		var ubike Ubike
+		err := rows.Scan(&ubike.Name, &ubike.Area, &ubike.Total)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ubikes = append(ubikes, ubike)
+	}
+	SendSuccess(w, ubikes)
+}
+
 //json-web-token
 func GenerateToken(user User) (string, error) {
 	var err error
-	s := "kuokuanyo"
+	s := os.Getenv("token_password")
 
 	//a jwt
 	//header.payload.s
@@ -276,4 +301,80 @@ func GenerateToken(user User) (string, error) {
 		log.Fatal(err)
 	}
 	return tokenString, nil
+}
+
+//jwt驗證
+func JwtAuthentication(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var errorObject Error
+		//從header中獲取token
+		authHeader := r.Header.Get("Authorization")
+		//不需要驗證的路徑
+		paths := []string{"/signup", "/login"}
+		//current request path
+		requestPath := r.URL.Path
+
+		//不須驗證，直接執行
+		for _, path := range paths {
+			if path == requestPath {
+				next.ServeHTTP(w, r)
+				return
+			}
+		}
+
+		//if authHeader is empty
+		if authHeader == "" {
+			errorObject.Message = "Missing auth token!"
+			SendError(w, http.StatusForbidden, errorObject)
+			return
+		}
+
+		//split string
+		splitted := strings.Split(authHeader, " ")
+
+		//if length is not 2
+		if len(splitted) != 2 {
+			errorObject.Message = "Invaild token."
+			SendError(w, http.StatusUnauthorized, errorObject)
+			return
+		}
+
+		//取第二個位置的值(token value)
+		authHeader = splitted[1]
+
+		//jwt解析並驗證
+		//func Parse(tokenString string, keyFunc Keyfunc) (*Token, error)
+		//type Keyfunc func(*Token) (interface{}, error)
+		/*
+			type Token struct {
+			Raw       string                 // The raw token.  Populated when you Parse a token
+			Method    SigningMethod          // The signing method used or to be used
+			Header    map[string]interface{} // The first segment of the token
+			Claims    Claims                 // The second segment of the token
+			Signature string                 // The third segment of the token.  Populated when you Parse a token
+			Valid     bool                   // Is the token valid?  Populated when you Parse/Verify a token
+			}
+		*/
+		token, err := jwt.Parse(authHeader, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("There was an error.")
+			}
+			return []byte(os.Getenv("token_password")), nil
+		})
+		if err != nil {
+			errorObject.Message = err.Error()
+			SendError(w, http.StatusUnauthorized, errorObject)
+			return
+		}
+
+		//if token is vaild, return true
+		if token.Valid {
+			//通過驗證
+			next.ServeHTTP(w, r)
+		} else {
+			errorObject.Message = err.Error()
+			SendError(w, http.StatusUnauthorized, errorObject)
+			return
+		}
+	})
 }
