@@ -1,5 +1,5 @@
 //刪除資料庫表
-package conn
+package driver
 
 import (
 	"fmt"

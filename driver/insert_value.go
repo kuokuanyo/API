@@ -1,5 +1,5 @@
 //插入數值
-package conn
+package driver
 
 import (
 	"fmt"
@@ -49,7 +49,6 @@ func (db DB) Insert(TableName string, args ...interface{}) {
 			Insert_str += "?, "
 		}
 	}
-
 
 	/*
 		使用預編譯語句(Prepared Statement)

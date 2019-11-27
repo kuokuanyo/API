@@ -1,5 +1,5 @@
 //更新資料
-package conn
+package driver
 
 import (
 	"fmt"

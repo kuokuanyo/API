@@ -1,4 +1,4 @@
-package conn
+package driver
 
 import (
 	"database/sql"
@@ -24,10 +24,16 @@ type DB struct {
 	*sql.DB
 }
 
+/*
+func NewDB(d *sql.DB) *DB {
+	return &DB{d}
+}
+*/
+
 //定義資料庫連線連線
 //完整的資料格式: [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
 //mehtod
-func (msu *MySqlUser) Init() *sql.DB {
+func (msu *MySqlUser) Init() *DB {
 
 	//資料庫連結字串
 	//func Sprintf(format string, a ...interface{}) string
@@ -41,7 +47,7 @@ func (msu *MySqlUser) Init() *sql.DB {
 	//開啟資料庫連線(sql.Open只是初始化sql.DB物件)
 	//func Open(driverName, dataSourceName string) (*DB, error)
 	//第一個參數為驅動名稱，第二個參數為資料庫的連結
-	DB, err := sql.Open("mysql", DataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	//檢查錯誤
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +55,7 @@ func (msu *MySqlUser) Init() *sql.DB {
 
 	//立即檢查資料庫連線是否可用
 	//func (db *DB) Ping() error
-	err = DB.Ping()
+	err = db.Ping()
 	//檢查錯誤
 	if err != nil {
 		log.Fatal(err)
@@ -57,13 +63,9 @@ func (msu *MySqlUser) Init() *sql.DB {
 
 	//設定最大連接數
 	//SetMaxIdleConns設置閒置的連接數
-	DB.SetMaxIdleConns(msu.MaxIdle)
+	db.SetMaxIdleConns(msu.MaxIdle)
 	//SetMaxOpenConns設置最大打開的連接數，默認值為0代表沒有限制
-	DB.SetMaxOpenConns(msu.MaxOpen)
+	db.SetMaxOpenConns(msu.MaxOpen)
 	//無錯誤
-	return DB
-}
-
-func NewDB(d *sql.DB) *DB {
-	return &DB{d}
+	return &DB{db}
 }
