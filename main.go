@@ -3,28 +3,23 @@ package main
 import (
 	"api/controllers"
 	"api/driver"
-	models "api/model"
 	"api/utils"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
-	"src/github.com/subosito/gotenv"
+	"github.com/subosito/gotenv"
 )
 
 var db *driver.DB
-var data driver.ColName
-var datas []driver.ColName
-var controller controllers.Controller
 
 //初始化連線
 func init() {
 	//read .env file
 	gotenv.Load()
+
 	//設定資料庫資訊
 	user := driver.MySqlUser{
 		Host:     os.Getenv("db_host"), //主機
@@ -40,9 +35,12 @@ func init() {
 }
 
 func main() {
+	//最後必須關閉
+	defer db.Close()
 	//create router
 	//func NewRouter() *Router
 	router := mux.NewRouter()
+	controller := controllers.Controller{}
 	//func (r *Router) HandleFunc(path string, f func(http.ResponseWriter, *http.Request)) *Route
 	//func (r *Router) Methods(methods ...string) *Route
 	router.HandleFunc("/signup", controller.Signup(db)).Methods("POST")
@@ -64,23 +62,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func Contact(w http.ResponseWriter, r *http.Request) {
-	var error models.Error
-
-	//return map
-	//func Vars(r *http.Request) map[string]string
-	params := mux.Vars(r)
-	fmt.Println(params)
-	id, _ := strconv.Atoi(params["id"])
-	fmt.Println(id)
-	data, err := db.ReadSome("data", "id", id, datas, data)
-	if err != nil {
-		error.Message = "Serve error"
-		//encode
-		utils.SendError(w, http.StatusInternalServerError, error)
-		return
-	}
-	utils.SendSuccess(w, data)
 }

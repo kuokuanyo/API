@@ -54,7 +54,7 @@ func (c Controller) Signup(db *driver.DB) http.HandlerFunc {
 		}
 
 		userRepo := userRepository.UserRepository{}
-		users, err := userRepo.CheckSignup(db, user)
+		users, err := userRepo.CheckSignup(db, users, user)
 		if err != nil {
 			error.Message = "Server error"
 			utils.SendError(w, http.StatusInternalServerError, error)
@@ -77,7 +77,7 @@ func (c Controller) Signup(db *driver.DB) http.HandlerFunc {
 		//convert to string
 		user.Password = string(hash)
 
-		user, err = userRepo.InsertSignup(db, user)
+		err = userRepo.InsertSignup(db, user)
 		if err != nil {
 			error.Message = "Server error"
 			utils.SendError(w, http.StatusInternalServerError, error)
@@ -88,6 +88,7 @@ func (c Controller) Signup(db *driver.DB) http.HandlerFunc {
 		user.Password = ""
 
 		utils.SendSuccess(w, "Successfully sign up!")
+
 	}
 }
 

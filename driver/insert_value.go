@@ -9,7 +9,7 @@ import (
 //插入值
 //INSERT INTO tablename(col_name...) values(?...)
 //args為插入的數值
-func (db DB) Insert(TableName string, args ...interface{}) {
+func (db DB) Insert(TableName string, args ...interface{}) error {
 
 	//加入欄位的長度
 	n := len(args)
@@ -85,5 +85,5 @@ func (db DB) Insert(TableName string, args ...interface{}) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	return nil
 }
