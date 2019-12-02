@@ -1,3 +1,8 @@
+//@title Restful API
+//@version 1.0.0
+//@description define an API
+//@host http://127.0.0.1:8080
+//@BasePath /
 package main
 
 import (
@@ -13,6 +18,7 @@ import (
 	"github.com/subosito/gotenv"
 )
 
+//資料庫
 var db *driver.DB
 
 //初始化連線
@@ -30,13 +36,14 @@ func init() {
 		Database: os.Getenv("db_name"), //資料庫名稱
 		Port:     os.Getenv("db_port"), //端口
 	}
-
+	//連線
 	db = user.Init()
 }
 
 func main() {
 	//最後必須關閉
 	defer db.Close()
+
 	//create router
 	//func NewRouter() *Router
 	router := mux.NewRouter()
@@ -45,13 +52,12 @@ func main() {
 	//func (r *Router) Methods(methods ...string) *Route
 	router.HandleFunc("/signup", controller.Signup(db)).Methods("POST")
 	router.HandleFunc("/login", controller.Login(db)).Methods("POST")
-	router.HandleFunc("/datas", controller.Contacts(db)).Methods("GET")
-	router.HandleFunc("/datas/{id}", controller.Contact(db)).Methods("GET")
+	router.HandleFunc("/data", controller.Contacts(db)).Methods("GET")
+	router.HandleFunc("/data/{id}", controller.Contact(db)).Methods("GET")
 
 	//func (r *Router) Use(mc MiddlewareChain)
 	//attach JWT auth middleware
 	router.Use(utils.JwtAuthentication)
-
 	//localhost
 	port := os.Getenv("PORT")
 	if port == "" {
