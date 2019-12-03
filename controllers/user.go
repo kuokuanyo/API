@@ -16,7 +16,18 @@ import (
 
 type Controller struct{}
 
-//func(http.ResponseWriter, *http.Request)
+//@Summary create a new account
+//@Tags User
+//@Description 註冊
+//@Accept json
+//@Produce json
+//@Param email body string true "信箱"
+//@Param password body string true "密碼"
+//@Success 200 {object} models.User "Successfully sign up!"
+//@Failure 400 {object} models.Error "email or password error"
+//@Failure 401 {object} models.Error "E-mail already taken"
+//@Failure 500 {object} models.Error "Serve(database) error"
+//@Router /signup [post]
 func (c Controller) Signup(db *driver.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.User
@@ -56,7 +67,7 @@ func (c Controller) Signup(db *driver.DB) http.HandlerFunc {
 		userRepo := userRepository.UserRepository{}
 		users, err := userRepo.CheckSignup(db, users, user)
 		if err != nil {
-			error.Message = "Server error"
+			error.Message = "Server(database) error"
 			utils.SendError(w, http.StatusInternalServerError, error)
 		}
 		//檢查
@@ -86,13 +97,23 @@ func (c Controller) Signup(db *driver.DB) http.HandlerFunc {
 
 		//加入資料庫後，密碼改為空白
 		user.Password = ""
-
-		utils.SendSuccess(w, "Successfully sign up!")
+		utils.SendSuccess(w, user)
 
 	}
 }
 
-//func(http.ResponseWriter, *http.Request)
+//@Summary Login
+//@Tags User
+//@Description 登入
+//@Accept json
+//@Produce json
+//@Param email body string true "信箱"
+//@Param password body string true "密碼"
+//@Success 200 {object} models.JWT "get json-token-web"
+//@Failure 400 {object} models.Error "email or password error"
+//@Failure 401 {object} models.Error "Invaild Password"
+//@Failure 500 {object} models.Error "Serve(database) error"
+//@Router /login [post]
 func (c Controller) Login(db *driver.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.User
@@ -126,7 +147,7 @@ func (c Controller) Login(db *driver.DB) http.HandlerFunc {
 				utils.SendError(w, http.StatusBadRequest, error)
 				return
 			} else {
-				error.Message = "Server error"
+				error.Message = "Server(database) error"
 				utils.SendError(w, http.StatusInternalServerError, error)
 				return
 			}
