@@ -21,8 +21,7 @@ type Controller struct{}
 //@Description 註冊
 //@Accept json
 //@Produce json
-//@Param email body string true "信箱"
-//@Param password body string true "密碼"
+//@Param information body models.user true "個人資料"
 //@Success 200 {object} models.User "Successfully sign up!"
 //@Failure 400 {object} models.Error "email or password error"
 //@Failure 401 {object} models.Error "E-mail already taken"
@@ -107,8 +106,7 @@ func (c Controller) Signup(db *driver.DB) http.HandlerFunc {
 //@Description 登入
 //@Accept json
 //@Produce json
-//@Param email body string true "信箱"
-//@Param password body string true "密碼"
+//@Param information body model.user true "個人資料"
 //@Success 200 {object} models.JWT "get json-token-web"
 //@Failure 400 {object} models.Error "email or password error"
 //@Failure 401 {object} models.Error "Invaild Password"

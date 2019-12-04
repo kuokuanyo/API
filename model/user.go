@@ -6,3 +6,9 @@ type User struct {
 	Email    string
 	Password string
 }
+
+//user information
+type user struct {
+	Email    string
+	Password string
+}

@@ -4,3 +4,7 @@ package models
 type JWT struct {
 	Token string
 }
+
+type jwt struct {
+	Authorization string
+}

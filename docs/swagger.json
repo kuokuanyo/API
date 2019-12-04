@@ -1,4 +1,7 @@
 {
+    "schemes": [
+        "http"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "Define an API",
@@ -7,10 +10,10 @@
         "license": {},
         "version": "1.0.0"
     },
-    "host": "localhost",
+    "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/contacts": {
+        "/data": {
             "get": {
                 "description": "取得所有資料",
                 "consumes": [
@@ -23,17 +26,6 @@
                     "Data"
                 ],
                 "summary": "get all datas",
-                "parameters": [
-                    {
-                        "description": "安全碼",
-                        "name": "token",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "get all datas",
@@ -50,7 +42,7 @@
                 }
             }
         },
-        "/contacts/{id}": {
+        "/data/{id}": {
             "get": {
                 "description": "取得部分資料",
                 "consumes": [
@@ -70,15 +62,6 @@
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "安全碼",
-                        "name": "token",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 ],
                 "responses": {
@@ -112,21 +95,12 @@
                 "summary": "Login",
                 "parameters": [
                     {
-                        "description": "信箱",
-                        "name": "email",
+                        "description": "個人資料",
+                        "name": "information",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "密碼",
-                        "name": "password",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.user"
                         }
                     }
                 ],
@@ -173,21 +147,12 @@
                 "summary": "create a new account",
                 "parameters": [
                     {
-                        "description": "信箱",
-                        "name": "email",
+                        "description": "個人資料",
+                        "name": "information",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "密碼",
-                        "name": "password",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.user"
                         }
                     }
                 ],
@@ -232,6 +197,17 @@
                 },
                 "math": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.user": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },

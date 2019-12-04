@@ -15,10 +15,9 @@ import (
 //@Description 取得所有資料
 //@Accept json
 //@Produce json
-//@Param token body string true "安全碼"
 //@Success 200 {object} driver.ColName "get all datas"
 //@Failure 500 {object} models.Error "Serve(database) error"
-//@Router /contacts [get]
+//@Router /data [get]
 func (c Controller) Contacts(db *driver.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var data driver.ColName
@@ -43,10 +42,9 @@ func (c Controller) Contacts(db *driver.DB) http.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID"
-// @Param token body string true "安全碼"
 // @Success 200 {object} driver.ColName "get some datas(from database)"
 // @Failure 500 {object} models.Error "Serve(database) error"
-// @Router /contacts/{id} [get]
+// @Router /data/{id} [get]
 func (c Controller) Contact(db *driver.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var data driver.ColName

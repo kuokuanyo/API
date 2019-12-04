@@ -1,7 +1,8 @@
 //@title Restful API
 //@version 1.0.0
 //@description Define an API
-//@host localhost
+//@Schemes http
+//@host localhost:8080
 //@BasePath /
 package main
 
