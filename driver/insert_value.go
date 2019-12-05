@@ -66,6 +66,7 @@ func (db DB) Insert(TableName string, args ...interface{}) error {
 	//檢查錯誤
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
 	//因插入的型態不同，因此建立[]interface{}
@@ -84,6 +85,7 @@ func (db DB) Insert(TableName string, args ...interface{}) error {
 	//檢查錯誤
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 	return nil
 }

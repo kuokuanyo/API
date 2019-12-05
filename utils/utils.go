@@ -58,7 +58,7 @@ func JwtAuthentication(next http.Handler) http.Handler {
 		//從header中獲取token
 		authHeader := r.Header.Get("Authorization")
 		//不需要驗證的路徑
-		paths := []string{"/signup", "/login"}
+		paths := []string{"/user/signup", "/user/login", "/admin/login"}
 		//current request path
 		requestPath := r.URL.Path
 

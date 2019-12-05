@@ -51,8 +51,12 @@ func main() {
 	controller := controllers.Controller{}
 	//func (r *Router) HandleFunc(path string, f func(http.ResponseWriter, *http.Request)) *Route
 	//func (r *Router) Methods(methods ...string) *Route
-	router.HandleFunc("/signup", controller.Signup(db)).Methods("POST")
-	router.HandleFunc("/login", controller.Login(db)).Methods("POST")
+	router.HandleFunc("/admin/login", controller.AdminLogin(db)).Methods("POST")
+	router.HandleFunc("/user/signup", controller.Signup(db)).Methods("POST")
+	router.HandleFunc("/user/login", controller.Login(db)).Methods("POST")
+	router.HandleFunc("/db/add/{id}/{math}/{eng}", controller.Insert(db)).Methods("POST")
+	router.HandleFunc("/db/update/{id}/{math}", controller.UpdateMath(db)).Methods("PUT")
+	router.HandleFunc("/db/update/{id}/{eng}", controller.UpdateEng(db)).Methods("PUT")
 	router.HandleFunc("/data", controller.Contacts(db)).Methods("GET")
 	router.HandleFunc("/data/{id}", controller.Contact(db)).Methods("GET")
 

@@ -1,0 +1,633 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "description": "Define an API",
+    "title": "Restful API",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "url": "http://www.example.com/support",
+      "email": "a167829435@gmail.com"
+    }
+  },
+  "paths": {
+    "/admin/login": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "管理者登入",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/user"
+        },
+        "responses": {
+          "200": {
+            "description": "Get json-token-web(jwt)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JWT"
+                },
+                "example": {
+                  "token": "MCRtVWFiQ2p4WE9oZEhOWXZzaElGUXB1ZEhTTE1jSGNCU1F3cE1pdVFHN0VIWTZ6SDE1RXd6QyJ9.4h7a50MQmUK56FXTilpo4kQ7LLab47_oaeZ71ulqKrM"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "E-mail or Password error!"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Invaild Password!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Database error!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/signup": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "創建新用戶",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/user"
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully sign up!",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "email": "test@example.com",
+                  "password": ""
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "E-mail or Password error!"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "E-mail already taken!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Database error!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "用戶登入",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/user"
+        },
+        "responses": {
+          "200": {
+            "description": "Get json-token-web(jwt)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JWT"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImExNjc4Mjk0MzVAZ21haWwuY29tIiwiZXhwIjoxNTc1NTE1NTYyLCJwYXNzd29yZCI6IiQyYSQxMCRtVWFiQ2p4WE9oZEhOWXZzaElGUXB1ZEhTTE1jSGNCU1F3cE1pdVFHN0VIWTZ6SDE1RXd6QyJ9.4h7a50MQmUK56FXTilpo4kQ7LLab47_oaeZ71ulqKrM"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "E-mail or Password error!"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Invaild Password!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Database error!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/db/{ID}/{math}/{eng}": {
+      "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "Database(admin)"
+        ],
+        "summary": "管理員增加資料",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/user"
+        },
+        "parameters": [
+          {
+            "description": "號碼",
+            "name": "ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "數學",
+            "name": "math",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "英文",
+            "name": "eng",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get some datas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Data"
+                },
+                "example": {
+                  "id": 1,
+                  "math": 100,
+                  "eng": 80
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "E-mail or Password error!"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Invaild Password!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Serve Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Database error!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/db/update/{ID}/{math}": {
+      "put": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "Database(admin)"
+        ],
+        "summary": "更改數學成績",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/user"
+        },
+        "parameters": [
+          {
+            "description": "號碼",
+            "name": "ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "數學",
+            "name": "math",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Data"
+                },
+                "example": "Successful"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "E-mail or Password error!"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Invaild Password!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Serve Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Database error!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/db/update/{ID}/{eng}": {
+      "put": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "Database(admin)"
+        ],
+        "summary": "更改英文成績",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/user"
+        },
+        "parameters": [
+          {
+            "description": "號碼",
+            "name": "ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "英文",
+            "name": "eng",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Data"
+                },
+                "example": "Successful"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "E-mail or Password error!"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Invaild Password!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Serve Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Database error!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data": {
+      "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "Data"
+        ],
+        "summary": "取得所有資料",
+        "responses": {
+          "200": {
+            "description": "Get all datas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Data"
+                },
+                "example": {
+                  "id": 1,
+                  "math": 100,
+                  "eng": 80
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Database error!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/{ID}": {
+      "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "Data"
+        ],
+        "summary": "取得部分資料",
+        "parameters": [
+          {
+            "description": "ID",
+            "name": "ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get some datas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Data"
+                },
+                "example": {
+                  "id": 1,
+                  "math": 100,
+                  "eng": 80
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Serve Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Database error!"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/"
+    }
+  ],
+  "components": {
+    "requestBodies": {
+      "user": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/user"
+            },
+            "example": {
+              "id": "example@gmail.com",
+              "password": "a123456"
+            }
+          }
+        },
+        "description": "個人資料",
+        "required": true
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Data": {
+        "type": "object",
+        "properties": {
+          "eng": {
+            "type": "integer"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "math": {
+            "type": "integer"
+          }
+        }
+      },
+      "JWT": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "user": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

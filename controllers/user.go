@@ -24,9 +24,9 @@ type Controller struct{}
 //@Param information body models.user true "個人資料"
 //@Success 200 {object} models.User "Successfully sign up!"
 //@Failure 400 {object} models.Error "email or password error"
-//@Failure 401 {object} models.Error "E-mail already taken"
+//@Failure 403 {object} models.Error "E-mail already taken"
 //@Failure 500 {object} models.Error "Serve(database) error"
-//@Router /signup [post]
+//@Router /user/signup [post]
 func (c Controller) Signup(db *driver.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.User
@@ -111,7 +111,7 @@ func (c Controller) Signup(db *driver.DB) http.HandlerFunc {
 //@Failure 400 {object} models.Error "email or password error"
 //@Failure 401 {object} models.Error "Invaild Password"
 //@Failure 500 {object} models.Error "Serve(database) error"
-//@Router /login [post]
+//@Router /user/login [post]
 func (c Controller) Login(db *driver.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.User
@@ -138,6 +138,83 @@ func (c Controller) Login(db *driver.DB) http.HandlerFunc {
 
 		userRepo := userRepository.UserRepository{}
 		user, err = userRepo.Login(db, user)
+		if err != nil {
+			//假設找不報此資料
+			if err == sql.ErrNoRows {
+				error.Message = "The user does not exist!"
+				utils.SendError(w, http.StatusBadRequest, error)
+				return
+			} else {
+				error.Message = "Server(database) error"
+				utils.SendError(w, http.StatusInternalServerError, error)
+				return
+			}
+		}
+		//資料庫裡的密碼
+		hashedpassword := user.Password
+
+		//有可能原始資料庫密碼沒有加密
+		if password != hashedpassword {
+			//比較密碼是否符合
+			//func CompareHashAndPassword(hashedPassword, password []byte) error
+			//亂碼的密碼與純文本密碼比較
+			err = bcrypt.CompareHashAndPassword([]byte(hashedpassword), []byte(password))
+			if err != nil {
+				error.Message = "Invaild Password"
+				utils.SendError(w, http.StatusUnauthorized, error)
+				return
+			}
+		}
+
+		//create token
+		token, err := utils.GenerateToken(user)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		jwt.Token = token
+		utils.SendSuccess(w, jwt)
+	}
+}
+
+//@Summary Admin Login
+//@Tags User
+//@Description 登入
+//@Accept json
+//@Produce json
+//@Param information body model.user true "個人資料"
+//@Success 200 {object} models.JWT "get json-token-web"
+//@Failure 400 {object} models.Error "email or password error"
+//@Failure 401 {object} models.Error "Invaild Password"
+//@Failure 500 {object} models.Error "Serve(database) error"
+//@Router /admin/login [post]
+func (c Controller) AdminLogin(db *driver.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var user models.User
+		var err error
+		var jwt models.JWT
+		var error models.Error
+
+		//decode
+		json.NewDecoder(r.Body).Decode(&user)
+
+		//email、password不能為空
+		if user.Email == "" {
+			error.Message = "E-mail is not empty!"
+			utils.SendError(w, http.StatusBadRequest, error)
+			return
+		}
+		if user.Password == "" {
+			error.Message = "Password is not empty!"
+			utils.SendError(w, http.StatusBadRequest, error)
+			return
+		}
+		//登入輸入的密碼
+		password := user.Password
+
+		userRepo := userRepository.UserRepository{}
+		user, err = userRepo.AdminLogin(db, user)
 		if err != nil {
 			//假設找不報此資料
 			if err == sql.ErrNoRows {

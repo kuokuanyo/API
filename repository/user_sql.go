@@ -24,3 +24,8 @@ func (u UserRepository) Login(db *driver.DB, user models.User) (models.User, err
 	user, err := db.ReadOneUser("members", user, "email")
 	return user, err
 }
+
+func (u UserRepository) AdminLogin(db *driver.DB, user models.User) (models.User, error) {
+	user, err := db.ReadOneUser("admin", user, "email")
+	return user, err
+}

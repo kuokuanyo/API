@@ -10,7 +10,7 @@ import (
 //args奇數索引為欄位，偶數為更改數值
 //args總共為四個參數，前兩個為設定數值，後兩個為更改條件
 //update tablename set ... where ...
-func (db DB) Update_db(TableName string, args ...interface{}) {
+func (db DB) Update_db(TableName string, args ...interface{}) error {
 
 	//args數量為四
 	if len(args) != 4 {
@@ -37,6 +37,7 @@ func (db DB) Update_db(TableName string, args ...interface{}) {
 	//檢查錯誤
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
 	//執行
@@ -44,5 +45,7 @@ func (db DB) Update_db(TableName string, args ...interface{}) {
 	//檢查錯誤
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
+	return err
 }
