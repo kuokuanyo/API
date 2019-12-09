@@ -448,6 +448,79 @@
         }
       }
     },
+    "/db/delete/{ID}": {
+      "put": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "Database(admin)"
+        ],
+        "summary": "刪除資料",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/user"
+        },
+        "parameters": [
+          {
+            "description": "號碼",
+            "name": "ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Data"
+                },
+                "example": "Successful"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "E-mail or Password error!"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Invaild Password!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Serve Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": "Database error!"
+              }
+            }
+          }
+        }
+      }
+    },
     "/data": {
       "get": {
         "security": [

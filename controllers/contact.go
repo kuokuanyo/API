@@ -323,3 +323,84 @@ func (c Controller) UpdateEng(db *driver.DB) http.HandlerFunc {
 		utils.SendSuccess(w, "Successful")
 	}
 }
+
+// @Summary delete data
+// @Tags Database(admin)
+// @Description 刪除資料
+// @Accept json
+// @Produce json
+// @Param information body model.user true "個人資料"
+// @Param id path int true "ID"
+// @Success 200 {string} json "Successful"
+// @Failure 400 {object} models.Error "email or password error"
+// @Failure 401 {object} models.Error "Invaild Password"
+// @Failure 500 {object} models.Error "Serve(database) error"
+// @Router /db/delete/{id} [delete]
+func (c Controller) DeleteID(db *driver.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var user models.User
+		var data driver.ColName
+		var error models.Error
+
+		params := mux.Vars(r)
+		//印出url的數值
+		data.Id, _ = strconv.Atoi(params["id"])
+
+		//decode
+		json.NewDecoder(r.Body).Decode(&user)
+		//信箱密碼驗證
+		//email、password不能為空
+		if user.Email == "" {
+			error.Message = "E-mail is not empty!"
+			utils.SendError(w, http.StatusBadRequest, error)
+			return
+		}
+		if user.Password == "" {
+			error.Message = "Password is not empty!"
+			utils.SendError(w, http.StatusBadRequest, error)
+			return
+		}
+		//登入輸入的密碼
+		password := user.Password
+
+		userRepo := userRepository.UserRepository{}
+		user, err := userRepo.AdminLogin(db, user)
+		if err != nil {
+			//假設找不報此資料
+			if err == sql.ErrNoRows {
+				error.Message = "The user does not exist!"
+				utils.SendError(w, http.StatusBadRequest, error)
+				return
+			} else {
+				error.Message = "Server(database) error"
+				utils.SendError(w, http.StatusInternalServerError, error)
+				return
+			}
+		}
+		//資料庫裡的密碼
+		hashedpassword := user.Password
+		//有可能原始資料庫密碼沒有加密
+		if password != hashedpassword {
+			//比較密碼是否符合
+			//func CompareHashAndPassword(hashedPassword, password []byte) error
+			//亂碼的密碼與純文本密碼比較
+			err = bcrypt.CompareHashAndPassword([]byte(hashedpassword), []byte(password))
+			if err != nil {
+				error.Message = "Invaild Password"
+				utils.SendError(w, http.StatusUnauthorized, error)
+				return
+			}
+		}
+
+		userRepo = userRepository.UserRepository{}
+		err = userRepo.DeleteID(db, data)
+
+		if err != nil {
+			error.Message = "Serve error"
+			//encode
+			utils.SendError(w, http.StatusInternalServerError, error)
+			return
+		}
+		utils.SendSuccess(w, "Successful")
+	}
+}

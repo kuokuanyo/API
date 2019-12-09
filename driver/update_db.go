@@ -47,5 +47,5 @@ func (db DB) Update_db(TableName string, args ...interface{}) error {
 		log.Fatal(err)
 		return err
 	}
-	return err
+	return nil
 }

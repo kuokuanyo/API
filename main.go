@@ -57,6 +57,7 @@ func main() {
 	router.HandleFunc("/db/add/{id}/{math}/{eng}", controller.Insert(db)).Methods("POST")
 	router.HandleFunc("/db/update/{id}/{math}", controller.UpdateMath(db)).Methods("PUT")
 	router.HandleFunc("/db/update/{id}/{eng}", controller.UpdateEng(db)).Methods("PUT")
+	router.HandleFunc("/db/delete/{id}", controller.DeleteID(db)).Methods("DELETE")
 	router.HandleFunc("/data", controller.Contacts(db)).Methods("GET")
 	router.HandleFunc("/data/{id}", controller.Contact(db)).Methods("GET")
 

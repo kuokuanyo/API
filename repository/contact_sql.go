@@ -26,3 +26,8 @@ func (u UserRepository) UpdateEng(db *driver.DB, data driver.ColName) error {
 	err := db.Update_db("data", "eng", data.Eng, "id", data.Id)
 	return err
 }
+
+func (u UserRepository) DeleteID(db *driver.DB, data driver.ColName) error {
+	err := db.DeleteValue("data", "id", data.Id)
+	return err
+}
